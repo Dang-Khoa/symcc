@@ -24,9 +24,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
 -Wredundant-decls -Wcast-align \
 -Wmissing-include-dirs -Wswitch-default \
 -Wextra -Wall -Winvalid-pch -Wredundant-decls -Wformat=2 \
--Wmissing-format-attribute -Wformat-nonliteral")
+-Wmissing-format-attribute -Wformat-nonliteral -Wno-unused-variable -Wno-unused-function -Wno-unused-parameter")
 
-set(SYMCC_RT_AVAILABLE_BACKENDS "simple" "qsym")
+set(SYMCC_RT_AVAILABLE_BACKENDS "simple" "mock")
 string(REPLACE ";" ", " SYMCC_RT_AVAILABLE_BACKENDS_FMT "\{${SYMCC_RT_AVAILABLE_BACKENDS}\}")
 
 set(SYMCC_RT_BACKEND "qsym" CACHE STRING "SymCC Runtime Backend to build.\

@@ -26,7 +26,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
 -Wextra -Wall -Winvalid-pch -Wredundant-decls -Wformat=2 \
 -Wmissing-format-attribute -Wformat-nonliteral")
 
-set(SYMCC_RT_AVAILABLE_BACKENDS "simple" "qsym")
+set(SYMCC_RT_AVAILABLE_BACKENDS "simple" "qsym", "hypercall")
 string(REPLACE ";" ", " SYMCC_RT_AVAILABLE_BACKENDS_FMT "\{${SYMCC_RT_AVAILABLE_BACKENDS}\}")
 
 set(SYMCC_RT_BACKEND "qsym" CACHE STRING "SymCC Runtime Backend to build.\

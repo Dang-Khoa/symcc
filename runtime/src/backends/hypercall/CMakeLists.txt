@@ -1,5 +1,26 @@
+# This file is part of the SymCC runtime.
+#
+# The SymCC runtime is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# The SymCC runtime is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+# for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License along
+# with SymCC. If not, see <https://www.gnu.org/licenses/>.
+message(STATUS "SHARED_RUNTIME_SOURCES ${SHARED_RUNTIME_SOURCES}")
+message(STATUS "SymCCRtSrc ${SymCCRtSrc}")
+message(STATUS "<TARGET_OBJECTS:SymCCRtObj> $<TARGET_OBJECTS:SymCCRtObj>")
+message(STATUS "SymCCRtDeps ${SymCCRtDeps}")
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "SYMCC_RT_INCLUDE_DIR ${SYMCC_RT_INCLUDE_DIR}")
 
-set(SymCCRtSrc ${SHARED_RUNTIME_SOURCES} Runtime.cpp)
+
+set(SymCCRtSrc ${SHARED_RUNTIME_SOURCES} Runtime.c)
 
 add_library(SymCCRtObj OBJECT
         ${SymCCRtSrc})
@@ -16,5 +37,8 @@ set(SymCCRtDeps ${Z3_LIBRARIES})
 target_link_libraries(SymCCRtShared ${SymCCRtDeps})
 target_link_libraries(SymCCRtStatic ${SymCCRtDeps})
 
-set_target_properties(SymCCRtObj PROPERTIES COMPILE_FLAGS "-Werror -Wno-error=deprecated-declarations")
+target_include_directories(SymCCRtObj PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${SYMCC_RT_INCLUDE_DIR})
 
+set_target_properties(SymCCRtObj PROPERTIES COMPILE_FLAGS "-Werror -Wno-error=deprecated-declarations")

@@ -13,12 +13,23 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the SymCC runtime. If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef RUNTIME_H
-#define RUNTIME_H
+#ifndef GARBAGECOLLECTION_H
+#define GARBAGECOLLECTION_H
 
-#include "expr.h"
+#include <utility>
+#include <set>
 
-typedef qsym::Expr *SymExpr;
-#include <RuntimeCommon.h>
+#include <Runtime.h>
+
+/// An imitation of std::span (which is not available before C++20) for symbolic
+/// expressions.
+using ExpressionRegion = std::pair<SymExpr *, size_t>;
+
+/// Add the specified region to the list of places to search for symbolic
+/// expressions.
+void registerExpressionRegion(ExpressionRegion r);
+
+/// Return the set of currently reachable symbolic expressions.
+std::set<SymExpr> collectReachableExpressions();
 
 #endif

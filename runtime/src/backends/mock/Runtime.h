@@ -19,6 +19,7 @@
 #include <z3.h>
 
 typedef Z3_ast SymExpr;
-#include "../../../include/RuntimeCommon.h"
+#include <RuntimeCommon.h>
+
 
 #endif

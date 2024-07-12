@@ -145,4 +145,5 @@ BUILD_FLOAT_UNORDERED_NOT_EQUAL,
     BCMP,
     BZERO,
 };
+
 #endif

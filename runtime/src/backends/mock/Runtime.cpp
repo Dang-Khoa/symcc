@@ -17,24 +17,13 @@
 
 #include <atomic>
 #include <cassert>
-#include <cstdio>
 #include <cstring>
-#include <iostream>
 #include <set>
-
-#include "Config.h"
-#include "GarbageCollection.h"
-#include "LibcWrappers.h"
-#include "Shadow.h"
 
 #ifndef NDEBUG
 // Helper to print pointers properly.
 #define P(ptr) reinterpret_cast<void *>(ptr)
 #endif
-
-#define FSORT(is_double)                                                       \
-  ((is_double) ? Z3_mk_fpa_sort_double(g_context)                              \
-               : Z3_mk_fpa_sort_single(g_context))
 
 /* TODO Eventually we'll want to inline as much of this as possible. I'm keeping
    it in C for now because that makes it easier to experiment with new features,
@@ -46,14 +35,8 @@ namespace {
 /// Indicate whether the runtime has been initialized.
 std::atomic_flag g_initialized = ATOMIC_FLAG_INIT;
 
-/// The global Z3 context.
-Z3_context g_context;
-
 /// The global floating-point rounding mode.
 Z3_ast g_rounding_mode;
-
-/// The global Z3 solver.
-Z3_solver g_solver; // TODO make thread-local
 
 // Some global constants for efficiency.
 Z3_ast g_null_pointer, g_true, g_false;
@@ -468,7 +451,3 @@ void _sym_collect_garbage() {
 }
 
 /* Test-case handling */
-void symcc_set_test_case_handler(TestCaseHandler) {
-  // ignore
-  return;
-}

@@ -12,11 +12,7 @@
 # You should have received a copy of the GNU General Public License along with
 # SymCC. If not, see <https://www.gnu.org/licenses/>.
 
-if (SYMCC_RT_BACKEND STREQUAL "qsym")
-  set(SYM_TEST_FILECHECK_ARGS "--check-prefix=QSYM --check-prefix=ANY")
-elseif (SYMCC_RT_BACKEND STREQUAL "simple")
-  set(SYM_TEST_FILECHECK_ARGS "--check-prefix=SIMPLE --check-prefix=ANY")
-elseif (SYMCC_RT_BACKEND STREQUAL "hypercall")
+if (SYMCC_RT_BACKEND STREQUAL "hypercall")
   set(SYM_TEST_FILECHECK_ARGS "--check-prefix=HYPERCALL --check-prefix=ANY")
 else()
   message(FATAL_ERROR "Unknown backend to test: ${SYMCC_RT_BACKEND}")

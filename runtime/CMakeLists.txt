@@ -26,12 +26,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
 -Wextra -Wall -Winvalid-pch -Wredundant-decls -Wformat=2 \
 -Wmissing-format-attribute -Wformat-nonliteral")
 
-set(SYMCC_RT_AVAILABLE_BACKENDS "simple" "qsym" "hypercall")
+set(SYMCC_RT_AVAILABLE_BACKENDS "hypercall")
 string(REPLACE ";" ", " SYMCC_RT_AVAILABLE_BACKENDS_FMT "\{${SYMCC_RT_AVAILABLE_BACKENDS}\}")
 
-set(SYMCC_RT_BACKEND "qsym" CACHE STRING "SymCC Runtime Backend to build.\
+set(SYMCC_RT_BACKEND "hypercall" CACHE STRING "SymCC Runtime Backend to build.\
 Backends available: ${SYMCC_RT_AVAILABLE_BACKENDS_FMT}.")
-option(Z3_TRUST_SYSTEM_VERSION "Use the system-provided Z3 without a version check" OFF)
 set(LLVM_VERSION "" CACHE STRING "LLVM version to use. The corresponding LLVM dev package must be installed.")
 
 # Place the final products in the top-level output directory

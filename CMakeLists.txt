@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.16)
 project(SymCC)
 
 set(LLVM_VERSION "" CACHE STRING "LLVM version to use. The corresponding LLVM dev package must be installed.")
-set(SYMCC_RT_BACKEND "qsym" CACHE STRING "The symbolic backend to use. Please check symcc-rt to get a list of the available backends.")
+set(SYMCC_RT_BACKEND "hypercall" CACHE STRING "The symbolic backend to use. Please check symcc-rt to get a list of the available backends.")
 option(TARGET_32BIT "Make the compiler work correctly with -m32" OFF)
 
 # We need to build the runtime as an external project because CMake otherwise
@@ -55,14 +55,12 @@ set(SYM_RUNTIME_BUILD_ARGS
   -DSYMCC_RT_BACKEND=${SYMCC_RT_BACKEND}
   -DLLVM_VERSION=${LLVM_PACKAGE_VERSION}
   -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-  -DZ3_TRUST_SYSTEM_VERSION=${Z3_TRUST_SYSTEM_VERSION})
 
 ExternalProject_Add(SymCCRuntime
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/runtime
   CMAKE_ARGS
   ${SYM_RUNTIME_BUILD_ARGS}
   -DCMAKE_EXPORT_COMPILE_COMMANDS=${CMAKE_EXPORT_COMPILE_COMMANDS}
-  -DZ3_DIR=${Z3_DIR}
   -DLLVM_DIR=${LLVM_DIR}
   INSTALL_COMMAND ""
   BUILD_ALWAYS TRUE)
@@ -75,9 +73,8 @@ if (${TARGET_32BIT})
     SOURCE_DIR ${CMAKE_SOURCE_DIR}/runtime
     CMAKE_ARGS
     ${SYM_RUNTIME_BUILD_ARGS}
-    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -m32"
-    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -m32"
-    -DZ3_DIR=${Z3_32BIT_DIR}
+    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}-m32"
+    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}-m32"
     -DLLVM_DIR=${LLVM_32BIT_DIR}
     INSTALL_COMMAND ""
     BUILD_ALWAYS TRUE)

@@ -9,8 +9,24 @@ typedef uint32_t uint_t;
 typedef uint64_t uint_t;
 #endif
 
-typedef void* Z3_ast;
-typedef void* SymExpr;
+typedef void * Z3_ast;
+typedef Z3_ast SymExpr;
+
+#define HYPERCALL_KAFL_RAX_ID                0x01f
+#define KAFL_HYPERCALL_PT(_rbx, _rcx, _rdx, _rsi, _rdi, _r8, _r9) ({ \
+    uint_t _rax = HYPERCALL_KAFL_RAX_ID; \
+    asm volatile( \
+        "vmmcall;" \
+    : "+a" (_rax) \
+    : "b" ((uint_t) (_rbx)), "c" ((uint_t)(_rcx)), "d" ((uint_t)(_rdx)), "D" ((uint_t)(_rdi)), "S" ((uint_t)(_rsi)) \
+    : "cc", "memory" \
+    ); \
+    _rax; \
+})
+
+static inline Z3_ast kAFL_hypercall(uint_t rbx, uint_t rcx, uint_t rdx, uint_t rsi, uint_t rdi, uint_t r8, uint_t r9) {
+    return (Z3_ast) KAFL_HYPERCALL_PT(rbx, rcx, rdx, rdi, rsi, r8, r9);
+}
 
 enum Sym {
     INITIALIZE = 1,
@@ -150,5 +166,7 @@ BUILD_FLOAT_UNORDERED_NOT_EQUAL,
     BCMP,
     BZERO,
 };
+
+#include <RuntimeCommon.h>
 
 #endif

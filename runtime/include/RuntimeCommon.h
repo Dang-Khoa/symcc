@@ -32,14 +32,11 @@
 /* Marker for expression parameters which may be null. */
 #define nullable
 
-#ifdef __cplusplus
-#include <cstddef>
-#include <cstdint>
-extern "C" {
-#else
+#include <Runtime.h>
+
 #include <stddef.h>
+#include <stdbool.h>
 #include <stdint.h>
-#endif
 
 /*
  * Initialization
@@ -227,10 +224,6 @@ void _sym_collect_garbage(void);
 void symcc_make_symbolic(const void *start, size_t byte_length);
 typedef void (*TestCaseHandler)(const void *, size_t);
 void symcc_set_test_case_handler(TestCaseHandler handler);
-
-#ifdef __cplusplus
-}
-#endif
 
 #undef nullable
 

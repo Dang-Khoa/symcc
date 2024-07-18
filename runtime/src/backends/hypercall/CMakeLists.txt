@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License along
 # with SymCC. If not, see <https://www.gnu.org/licenses/>.
-set(SymCCRtSrc ${SHARED_RUNTIME_SOURCES} Runtime)
+set(SymCCRtSrc ${SHARED_RUNTIME_SOURCES} Runtime.c)
 
 add_library(SymCCRtObj OBJECT
         ${SymCCRtSrc})

@@ -43,11 +43,8 @@ set(SYMCC_RT_BACKEND_DIR "${SYMCC_RT_SRC_DIR}/backends/${SYMCC_RT_BACKEND}")
 
 # There is list(TRANSFORM ... PREPEND ...), but it's not available before CMake 3.12.
 set(SHARED_RUNTIME_SOURCES
-  ${SYMCC_RT_SRC_DIR}/Config.cpp
-  ${SYMCC_RT_SRC_DIR}/RuntimeCommon.cpp
-  ${SYMCC_RT_SRC_DIR}/LibcWrappers.cpp
-  ${SYMCC_RT_SRC_DIR}/Shadow.cpp
-  ${SYMCC_RT_SRC_DIR}/GarbageCollection.cpp)
+  ${SYMCC_RT_SRC_DIR}/RuntimeCommon.c
+  ${SYMCC_RT_SRC_DIR}/LibcWrappers.c)
 
 # Backends should produce two targets: SymCCRtStatic (static library) and SymCCRtShared (shared library).
 add_subdirectory("${SYMCC_RT_BACKEND_DIR}")

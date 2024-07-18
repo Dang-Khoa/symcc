@@ -27,32 +27,16 @@
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
 #endif
 
-#define HYPERCALL_KAFL_RAX_ID                0x01f
-#define KAFL_HYPERCALL_PT(_rbx, _rcx, _rdx, _rsi, _rdi, _r8, _r9) ({ \
-    uint_t _rax = HYPERCALL_KAFL_RAX_ID; \
-    asm volatile( \
-        "vmmcall;" \
-    : "+a" (_rax) \
-    : "b" ((uint_t) (_rbx)), "c" ((uint_t)(_rcx)), "d" ((uint_t)(_rdx)), "D" ((uint_t)(_rdi)), "S" ((uint_t)(_rsi)), "r" ((uint_t)(_r8)), "r" ((uint_t)(_r9)) \
-    : "cc", "memory" \
-    ); \
-    _rax; \
-})
-
-static inline Z3_ast kAFL_hypercall(uint_t rbx, uint_t rcx, uint_t rcd, uint_t rsi, uint_t rdi, uint_t r8, uint_t r9) {
-    return (Z3_ast)KAFL_HYPERCALL_PT(rbx, rcx, rdx, rdi, rsi, r8, r9);
-}
-
 void _sym_initialize(void) {
     kAFL_hypercall(INITIALIZE, 0, 0, 0, 0, 0, 0);
     return;
 }
 
-Z3_ast _sym_build_integer(uint_t value, uint8_t bits) {
+SymExpr _sym_build_integer(uint64_t value, uint8_t bits) {
     return kAFL_hypercall(BUILD_INTEGER, value, (uint_t) bits, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_integer128(uint_t high, uint_t low) {
+SymExpr _sym_build_integer128(uint64_t high, uint64_t low) {
     return kAFL_hypercall(BUILD_INTEGER128, high, low, 0, 0, 0, 0);
 }
 
@@ -60,37 +44,37 @@ SymExpr _sym_build_integer_from_buffer(void *buffer, unsigned num_bits) {
     return kAFL_hypercall(BUILD_INTEGER_FROM_BUFFER, (uint_t) buffer, (uint_t) num_bits, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float(double value, int is_double) {
+SymExpr _sym_build_float(double value, int is_double) {
     return kAFL_hypercall(BUILD_FLOAT, (uint_t) value, (uint_t) is_double, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_get_input_byte(size_t offset,  uint8_t concrete_value){
+SymExpr _sym_get_input_byte(size_t offset,  uint8_t concrete_value){
     return kAFL_hypercall(GET_INPUT_BYTE, offset, (uint_t) concrete_value, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_null_pointer(void)  {
+SymExpr _sym_build_null_pointer(void)  {
     return kAFL_hypercall(BUILD_NULL_POINTER, 0, 0, 0, 0, 0, 0);
 }
-Z3_ast _sym_build_true(void)  {
+SymExpr _sym_build_true(void)  {
     return kAFL_hypercall(BUILD_TRUE, 0, 0, 0, 0, 0, 0);
 }
-Z3_ast _sym_build_false(void)  {
+SymExpr _sym_build_false(void)  {
     return kAFL_hypercall(BUILD_FALSE, 0, 0, 0, 0, 0, 0);
 }
 
 // in cpp it was bool
-Z3_ast _sym_build_bool(bool value)  {
+SymExpr _sym_build_bool(bool value)  {
     return kAFL_hypercall(BUILD_BOOL, (uint_t) value, 0, 0, 0, 0, 0);
 }
 
 
 // TODO check
-Z3_ast _sym_build_neg(Z3_ast expr) {
+SymExpr _sym_build_neg(Z3_ast expr) {
     return kAFL_hypercall(BUILD_NEG, (uint_t) expr, 0, 0, 0, 0, 0);
 }
 
 #define DEF_BINARY_EXPR_BUILDER(name, z3_name) \
-    Z3_ast _sym_build_##name(Z3_ast a, Z3_ast b) { \
+    SymExpr _sym_build_##name(Z3_ast a, Z3_ast b) { \
 	return kAFL_hypercall(z3_name, (uint_t) a, (uint_t) b, 0, 0, 0, 0); \
     }
 
@@ -128,139 +112,139 @@ DEF_BINARY_EXPR_BUILDER(float_ordered_equal, BUILD_FLOAT_ORDERED_EQUAL)
 
 #undef DEF_BINARY_EXPR_BUILDER
 
-Z3_ast _sym_build_ite(Z3_ast cond, Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_ite(Z3_ast cond, Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_ITE, (uint_t)cond, (uint_t)a, (uint_t)b, 0, 0, 0);
 }
 
-Z3_ast _sym_build_fp_add(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_fp_add(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FP_ADD, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_fp_sub(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_fp_sub(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FP_SUB, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_fp_mul(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_fp_mul(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FP_MUL, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_fp_div(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_fp_div(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FP_DIV, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_fp_rem(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_fp_rem(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FP_REM, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_fp_abs(Z3_ast a) {
+SymExpr _sym_build_fp_abs(Z3_ast a) {
 	return kAFL_hypercall(BUILD_FP_ABS, (uint_t)a, 0, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_fp_neg(Z3_ast a) {
+SymExpr _sym_build_fp_neg(Z3_ast a) {
 	return kAFL_hypercall(BUILD_FP_NEG, (uint_t)a, 0, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_not(Z3_ast expr) {
+SymExpr _sym_build_not(Z3_ast expr) {
 	return kAFL_hypercall(BUILD_NOT, (uint_t)expr, 0, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_not_equal(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_not_equal(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_NOT_EQUAL, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_bool_and(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_bool_and(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_BOOL_AND, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_bool_or(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_bool_or(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_BOOL_OR, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_ordered_not_equal(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_float_ordered_not_equal(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FLOAT_ORDERED_NOT_EQUAL, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_ordered(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_float_ordered(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FLOAT_ORDERED, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_unordered(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_float_unordered(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FLOAT_UNORDERED, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_unordered_greater_than(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_float_unordered_greater_than(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FLOAT_UNORDERED_GREATER_THAN, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_unordered_greater_equal(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_float_unordered_greater_equal(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FLOAT_UNORDERED_GREATER_EQUAL, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_unordered_less_than(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_float_unordered_less_than(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FLOAT_UNORDERED_LESS_THAN, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_unordered_less_equal(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_float_unordered_less_equal(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FLOAT_UNORDERED_LESS_EQUAL, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_unordered_equal(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_float_unordered_equal(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FLOAT_UNORDERED_EQUAL, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_unordered_not_equal(Z3_ast a, Z3_ast b) {
+SymExpr _sym_build_float_unordered_not_equal(Z3_ast a, Z3_ast b) {
 	return kAFL_hypercall(BUILD_FLOAT_UNORDERED_NOT_EQUAL, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_sext(Z3_ast expr, uint8_t bits) {
+SymExpr _sym_build_sext(Z3_ast expr, uint8_t bits) {
 	return kAFL_hypercall(BUILD_SEXT, (uint_t)expr, (uint_t) bits, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_zext(Z3_ast expr, uint8_t bits) {
+SymExpr _sym_build_zext(Z3_ast expr, uint8_t bits) {
 	return kAFL_hypercall(BUILD_ZEXT, (uint_t)expr, (uint_t) bits, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_trunc(Z3_ast expr, uint8_t bits) {
+SymExpr _sym_build_trunc(Z3_ast expr, uint8_t bits) {
 	return kAFL_hypercall(BUILD_TRUNC, (uint_t)expr, (uint_t) bits, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_int_to_float(Z3_ast value, int is_double, int is_signed) {
+SymExpr _sym_build_int_to_float(Z3_ast value, int is_double, int is_signed) {
 	return kAFL_hypercall(BUILD_INT_TO_FLOAT, (uint_t)value, (uint_t) is_double, (uint_t) is_signed, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_to_float(Z3_ast expr, int to_double) {
+SymExpr _sym_build_float_to_float(Z3_ast expr, int to_double) {
 	return kAFL_hypercall(BUILD_FLOAT_TO_FLOAT, (uint_t)expr, (uint_t) to_double, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_bits_to_float(Z3_ast expr, int to_double) {
+SymExpr _sym_build_bits_to_float(Z3_ast expr, int to_double) {
 	return kAFL_hypercall(BUILD_BITS_TO_FLOAT, (uint_t)expr, (uint_t) to_double, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_to_bits(Z3_ast expr) {
+SymExpr _sym_build_float_to_bits(Z3_ast expr) {
 	return kAFL_hypercall(BUILD_FLOAT_TO_BITS, (uint_t)expr, 0, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_to_signed_integer(Z3_ast expr, uint8_t bits) {
+SymExpr _sym_build_float_to_signed_integer(Z3_ast expr, uint8_t bits) {
 	return kAFL_hypercall(BUILD_FLOAT_TO_SIGNED_INTEGER, (uint_t)expr, (uint_t) bits, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_float_to_unsigned_integer(Z3_ast expr, uint8_t bits) {
+SymExpr _sym_build_float_to_unsigned_integer(Z3_ast expr, uint8_t bits) {
 	return kAFL_hypercall(BUILD_FLOAT_TO_UNSIGNED_INTEGER, (uint_t)expr, (uint_t) bits, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_build_bool_to_bit(Z3_ast expr) {
+SymExpr _sym_build_bool_to_bit(Z3_ast expr) {
 	return kAFL_hypercall(BUILD_BOOL_TO_BIT, (uint_t)expr, 0, 0, 0, 0, 0);
 }
 
-void _sym_push_path_constraint(Z3_ast constraint, int taken, uintptr_t size_id [[maybe_unused]]) {
+void _sym_push_path_constraint(SymExpr constraint, int taken, uintptr_t size_id [[maybe_unused]]) {
     kAFL_hypercall(PUSH_PATH_CONSTRAINT, (uint_t) constraint, (uint_t) taken, (uint_t) size_id, 0, 0, 0);
 }
 
-Z3_ast _sym_concat_helper(SymExpr a, SymExpr b) {
+SymExpr _sym_concat_helper(SymExpr a, SymExpr b) {
 	return kAFL_hypercall(CONCAT_HELPER, (uint_t)a, (uint_t)b, 0, 0, 0, 0);
 }
 
-Z3_ast _sym_extract_helper(SymExpr expr, size_t first_bit, size_t last_bit) {
+SymExpr _sym_extract_helper(SymExpr expr, size_t first_bit, size_t last_bit) {
 	return kAFL_hypercall(EXTRACT_HELPER, (uint_t) expr, (uint_t) first_bit, (uint_t) last_bit, 0, 0, 0);
 }
 
@@ -274,7 +258,7 @@ void _sym_notify_ret(uintptr_t) {}
 void _sym_notify_basic_block(uintptr_t) {}
 
 
-char *_sym_expr_to_string(SymExpr expr) {
+const char *_sym_expr_to_string(SymExpr expr) {
     return kAFL_hypercall(EXPR_TO_STRING, (uint_t) expr, 0, 0, 0, 0, 0);
 }
 
@@ -283,13 +267,12 @@ bool _sym_feasible(SymExpr expr) {
 }
 
 void _sym_collect_garbage() {
-    return kAFL_hypercall(COLLECT_GARBAGE, 0, 0, 0, 0, 0, 0);
+    kAFL_hypercall(COLLECT_GARBAGE, 0, 0, 0, 0, 0, 0);
 }
 
 void symcc_set_test_case_handler(TestCaseHandler) {
     return;
 }
-
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop

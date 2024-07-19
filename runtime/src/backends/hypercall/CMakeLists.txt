@@ -12,6 +12,26 @@
 #
 # You should have received a copy of the GNU Lesser General Public License along
 # with SymCC. If not, see <https://www.gnu.org/licenses/>.
+find_package(Z3 4 CONFIG)
+if (NOT Z3_FOUND)
+  if (NOT Z3_TRUST_SYSTEM_VERSION)
+    message(FATAL_ERROR "Couldn't locate Z3. \
+If you want me to trust that a suitable version is available nonetheless, \
+configure CMake with -DZ3_TRUST_SYSTEM_VERSION=on (see also docs/Configuration.txt).")
+  else()
+    if (EXISTS "/usr/include/z3")
+      set(Z3_C_INCLUDE_DIRS "/usr/include/z3")
+    else()
+      set(Z3_C_INCLUDE_DIRS)
+    endif()
+    set(Z3_LIBRARIES "z3")
+  endif()
+endif()
+
+message (STATUS "Z3_INCLUDE_DIRS ${Z3_C_INCLUDE_DIRS}")
+message (STATUS "SYMCC_RT_INCLUDE_DIRS ${SYMCC_RT_INCLUDE_DIR}")
+message (STATUS "CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}")
+
 set(SymCCRtSrc ${SHARED_RUNTIME_SOURCES} Runtime.c)
 
 add_library(SymCCRtObj OBJECT
@@ -31,6 +51,7 @@ target_link_libraries(SymCCRtStatic ${SymCCRtDeps})
 
 target_include_directories(SymCCRtObj PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${SYMCC_RT_INCLUDE_DIR})
+  ${SYMCC_RT_INCLUDE_DIR}
+  ${Z3_C_INCLUDE_DIRS})
 
 set_target_properties(SymCCRtObj PROPERTIES COMPILE_FLAGS "-Werror -Wno-error=deprecated-declarations")

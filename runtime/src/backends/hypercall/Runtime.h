@@ -1,7 +1,9 @@
 #ifndef RUNTIME_H
 #define RUNTIME_H
 
-#include <stdint.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <z3.h>
 
 #if defined(__ILP32__) || defined(_ILP32)
 typedef uint32_t uint_t;
@@ -9,23 +11,49 @@ typedef uint32_t uint_t;
 typedef uint64_t uint_t;
 #endif
 
-typedef void * Z3_ast;
 typedef Z3_ast SymExpr;
 
+// Type punning
+extern union {
+    uint_t uint;
+    uint64_t u64;
+    uint32_t u32;
+    uint8_t u8;
+    unsigned u;
+    int i;
+    double d;
+    long l;
+    bool b;
+    size_t size;
+    ssize_t ssize;
+    uintptr_t uintptr;  
+    mode_t mode;    
+    char *str;
+    const char *cstr;
+    void *ptr; 
+    const void *cptr; 
+    uint8_t *u8ptr;
+    const uint8_t *cu8ptr;
+    FILE *fileptr;
+    Z3_ast z3;
+    SymExpr sym;
+    SymExpr *symptr;
+} pun;
+
 #define HYPERCALL_KAFL_RAX_ID                0x01f
-#define KAFL_HYPERCALL_PT(_rbx, _rcx, _rdx, _rsi, _rdi, _r8, _r9) ({ \
+#define KAFL_HYPERCALL_PT(_rbx, _rcx, _rdx, _rdi, _rsi, _r8, _r9) ({ \
     uint_t _rax = HYPERCALL_KAFL_RAX_ID; \
     asm volatile( \
         "vmmcall;" \
     : "+a" (_rax) \
-    : "b" ((uint_t) (_rbx)), "c" ((uint_t)(_rcx)), "d" ((uint_t)(_rdx)), "D" ((uint_t)(_rdi)), "S" ((uint_t)(_rsi)) \
+    : "b" (_rbx), "c" (_rcx), "d" (_rdx), "D" (_rdi), "S" (_rsi) \
     : "cc", "memory" \
     ); \
     _rax; \
 })
 
-static inline Z3_ast kAFL_hypercall(uint_t rbx, uint_t rcx, uint_t rdx, uint_t rsi, uint_t rdi, uint_t r8, uint_t r9) {
-    return (Z3_ast) KAFL_HYPERCALL_PT(rbx, rcx, rdx, rdi, rsi, r8, r9);
+static inline uint_t kAFL_hypercall(uint_t rbx, uint_t rcx, uint_t rdx, uint_t rdi, uint_t rsi, uint_t r8, uint_t r9) {
+    return KAFL_HYPERCALL_PT(rbx, rcx, rdx, rdi, rsi, r8, r9);
 }
 
 enum Sym {
@@ -88,7 +116,7 @@ enum Sym {
     BUILD_FLOAT_UNORDERED_LESS_THAN,
     BUILD_FLOAT_UNORDERED_LESS_EQUAL,
     BUILD_FLOAT_UNORDERED_EQUAL,
-BUILD_FLOAT_UNORDERED_NOT_EQUAL,
+    BUILD_FLOAT_UNORDERED_NOT_EQUAL,
     BUILD_SEXT,
     BUILD_ZEXT,
     BUILD_TRUNC,
@@ -135,6 +163,7 @@ BUILD_FLOAT_UNORDERED_NOT_EQUAL,
     BUILD_ABS,
     REGISTER_EXPRESSION_REGION,
     MAKE_SYMBOLIC,
+    SYMCC_MAKE_SYMBOLIC,
     MALLOC,
     CALLOC,
     MMAP,

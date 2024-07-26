@@ -12,7 +12,6 @@
 #
 # You should have received a copy of the GNU Lesser General Public License along
 # with SymCC. If not, see <https://www.gnu.org/licenses/>.
-
 find_package(Z3 4 CONFIG)
 if (NOT Z3_FOUND)
   if (NOT Z3_TRUST_SYSTEM_VERSION)

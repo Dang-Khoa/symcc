@@ -24,8 +24,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
 -Wredundant-decls -Wcast-align \
 -Wmissing-include-dirs -Wswitch-default \
 -Wextra -Wall -Winvalid-pch -Wredundant-decls -Wformat=2 \
--Wmissing-format-attribute -Wformat-nonliteral -Wno-implicit-function-declaration \
--Wno-builtin-declaration-mismatch -Wno-implicit-int")
+-Wmissing-format-attribute -Wformat-nonliteral")
 
 set(SYMCC_RT_AVAILABLE_BACKENDS "simple" "qsym" "hypercall")
 string(REPLACE ";" ", " SYMCC_RT_AVAILABLE_BACKENDS_FMT "\{${SYMCC_RT_AVAILABLE_BACKENDS}\}")

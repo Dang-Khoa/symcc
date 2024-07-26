@@ -29,7 +29,7 @@ configure CMake with -DZ3_TRUST_SYSTEM_VERSION=on (see also docs/Configuration.t
   endif()
 endif()
 
-set(SymCCRtSrc ${SHARED_RUNTIME_SOURCES} Runtime.cpp)
+set(SymCCRtSrc ${SHARED_RUNTIME_SOURCES} Runtime.c)
 
 add_library(SymCCRtObj OBJECT
         ${SymCCRtSrc})

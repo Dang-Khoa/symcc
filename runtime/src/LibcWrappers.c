@@ -28,171 +28,203 @@
 // values, then call the wrapped function, create and store symbolic expressions
 // matching the libc function's semantics, and finally return the wrapped
 // function's result.
+#define _LARGEFILE64_SOURCE
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/mman.h>
+#include <stdio.h>
+#include <arpa/inet.h>
 
 #include <Runtime.h>
-
-#include <stddef.h>
-#include <stdio.h>
-#include <sys/stat.h>
-
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-#endif
+#include <Hypercall.h>
 
 #define SYM(x) x##_symbolized
 
+static pun_t pun;
+
 void *SYM(malloc)(size_t size) {
-    pun.size = size;
-    uint_t rcx = pun.uint;
-
-    pun.uint = kAFL_hypercall(MALLOC, rcx, 0, 0, 0, 0, 0);
-    return pun.ptr;
-}
-
-void *SYM(calloc)(size_t nmemb, size_t size) {
-    pun.size = nmemb;
+    void *result = malloc(size);
+	
+    pun.ptr = malloc(size);
     uint_t rcx = pun.uint;
     pun.size = size;
     uint_t rdx = pun.uint;
+    kAFL_hypercall(MALLOC, rcx, rdx, 0, 0, 0, 0);
 
-    pun.uint = kAFL_hypercall(CALLOC, rcx, 0, 0, 0, 0, 0);
-    return pun.ptr;
+    return result;
+}
+
+void *SYM(calloc)(size_t nmemb, size_t size) {
+    void *result = calloc(nmemb, size);
+	
+	pun.ptr = result;
+	uint_t rcx = pun.uint;
+    pun.size = nmemb;
+    uint_t rdx = pun.uint;
+    pun.size = size;
+    uint_t rdi = pun.uint;
+    kAFL_hypercall(CALLOC, rcx, rdx, rdi, 0, 0, 0);
+
+    return result;
 }
 
 void *SYM(mmap64)(void *addr, size_t len, int prot, int flags, int fildes,
                   uint64_t off) {
+    void *result = mmap64(addr, len, prot, flags, fildes, off);
+	
+    //TODO r8, r9, r10
+	pun.ptr = result;
+	uint_t rcx = pun.uint;
     pun.ptr = addr;
-    uint_t rcx = pun.uint;
-    pun.size = len;
     uint_t rdx = pun.uint;
-    pun.i = prot;
+    pun.size = len;
     uint_t rdi = pun.uint;
-    pun.i = flags;
+    pun.i = prot;
     uint_t rsi = pun.uint;
-    pun.i = fildes;
+    pun.i = flags;
     uint_t r8 = pun.uint;
-    pun.u64 = off;
+    pun.i = fildes;
     uint_t r9 = pun.uint;
+    pun.u64 = off;
+    uint_t r10 = pun.uint;
+    kAFL_hypercall(MMAP64, rcx, rdx, rdi, rsi, r8, r9);
 
-    pun.uint = kAFL_hypercall(MMAP64, rcx, rdx, rdi, rsi, r8, r9);
-    return pun.ptr;
+    return result;
 }
 
 void *SYM(mmap)(void *addr, size_t len, int prot, int flags, int fildes,
                 uint32_t off) {
-    pun.ptr = addr;
-    uint_t rcx = pun.uint;
-    pun.size = len;
-    uint_t rdx = pun.uint;
-    pun.i = prot;
-    uint_t rdi = pun.uint;
-    pun.i = flags;
-    uint_t rsi = pun.uint;
-    pun.i = fildes;
-    uint_t r8 = pun.uint;
-    pun.u32 = off;
-    uint_t r9 = pun.uint;
-
-    pun.uint = kAFL_hypercall(MMAP, rcx, rdx, rdi, rsi, r8, r9);
-    return pun.ptr;
+    return SYM(mmap64)(addr, len, prot, flags, fildes, off);
 }
 
 int SYM(open)(const char *path, int oflag, mode_t mode) {
+    int result = open(path, oflag, mode);
+	
+	pun.i = result;
+	uint_t rcx = pun.uint;
     pun.cstr = path;
-    uint_t rcx = pun.uint;
-    pun.i = oflag;
     uint_t rdx = pun.uint;
-    pun.mode = mode;
+    pun.i = oflag;
     uint_t rdi = pun.uint;
+    pun.mode = mode;
+    uint_t rsi = pun.uint;
+    kAFL_hypercall(OPEN, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(OPEN, rcx, rdx, rdi, 0, 0, 0);
-    return pun.i;
+    return result;
 }
 
 ssize_t SYM(read)(int fildes, void *buf, size_t nbyte) {
+    ssize_t result = read(fildes, buf, nbyte);
+	
+	pun.ssize = result;
+	uint_t rcx = pun.uint;
     pun.i = fildes;
-    uint_t rcx = pun.uint;
-    pun.ptr = buf;
     uint_t rdx = pun.uint;
-    pun.size = nbyte;
+    pun.ptr = buf;
     uint_t rdi = pun.uint;
+    pun.size = nbyte;
+    uint_t rsi = pun.uint;
+    kAFL_hypercall(READ, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(READ, rcx, rdx, rdi, 0, 0, 0);
-    return pun.ssize;
+    return result;
 }
 
 uint64_t SYM(lseek64)(int fd, uint64_t offset, int whence) {
+    off64_t result = lseek64(fd, offset, whence);
+	
+	pun.off64 = result;
+	uint_t rcx = pun.uint;
     pun.i = fd;
-    uint_t rcx = pun.uint;
-    pun.u64 = offset;
     uint_t rdx = pun.uint;
-    pun.i = whence;
+    pun.u64 = offset;
     uint_t rdi = pun.uint;
+    pun.i = whence;
+    uint_t rsi = pun.uint;
+    kAFL_hypercall(LSEEK64, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(LSEEK64, rcx, rdx, rdi, 0, 0, 0);
-    return pun.u64;
+    return result;
 }
 
 uint32_t SYM(lseek)(int fd, uint32_t offset, int whence) {
-    pun.i = fd;
-    uint_t rcx = pun.uint;
-    pun.u32 = offset;
-    uint_t rdx = pun.uint;
-    pun.i = whence;
-    uint_t rdi = pun.uint;
+    uint64_t result = SYM(lseek64)(fd, offset, whence);
 
-    pun.uint = kAFL_hypercall(LSEEK, rcx, rdx, rdi, 0, 0, 0);
-    return pun.u32;
+    // Perform the same overflow check as glibc in the 32-bit version of lseek.
+    uint32_t result32 = (uint32_t)result;
+    if (result == result32)
+        return result32;
+	
+    errno = EOVERFLOW;
+    return (uint32_t)-1;
 }
 
 FILE *SYM(fopen)(const char *pathname, const char *mode) {
+    FILE *result = fopen(pathname, mode);
+	
+	pun.fileptr = result;
+	uint_t rcx = pun.uint;
     pun.cstr = pathname;
-    uint_t rcx = pun.uint;
-    pun.cstr = mode;
     uint_t rdx = pun.uint;
+    pun.cstr = mode;
+    uint_t rdi = pun.uint;
+    kAFL_hypercall(FOPEN, rcx, rdx, rdi, 0, 0, 0);
 
-    pun.uint = kAFL_hypercall(FOPEN, rcx, rdx, 0, 0, 0, 0);
-    return pun.fileptr;
+    return result;
 }
 
 FILE *SYM(fopen64)(const char *pathname, const char *mode) {
+    FILE *result = fopen64(pathname, mode);
+	
+	pun.ptr = result;
+	uint_t rcx = pun.uint;
     pun.cstr = pathname;
-    uint_t rcx = pun.uint;
-    pun.cstr = mode;
     uint_t rdx = pun.uint;
+    pun.cstr = mode;
+    uint_t rdi = pun.uint;
+    kAFL_hypercall(FOPEN64, rcx, rdx, rdi, 0, 0, 0);
 
-    pun.uint = kAFL_hypercall(FOPEN64, rcx, rdx, 0, 0, 0, 0);
-    return pun.fileptr;
+    return result;
 }
 
 size_t SYM(fread)(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+    size_t result = fread(ptr, size, nmemb, stream);
+	
+	pun.size = result;
+	uint_t rcx = pun.uint;
     pun.ptr = ptr;
-    uint_t rcx = pun.uint;
-    pun.size = size;
     uint_t rdx = pun.uint;
-    pun.size = nmemb;
+    pun.size = size;
     uint_t rdi = pun.uint;
-    pun.fileptr = stream;
+    pun.size = nmemb;
     uint_t rsi = pun.uint;
+    pun.fileptr = stream;
+    uint_t r8 = pun.uint;
+    kAFL_hypercall(FREAD, rcx, rdx, rdi, rsi, r8, 0);
 
-    pun.uint = kAFL_hypercall(FREAD, rcx, rdx, rdi, rsi, 0, 0);
-    return pun.size;
+    return  result;
 }
 
 char *SYM(fgets)(char *str, int n, FILE *stream) {
+    char *result = fgets(str, n, stream);
+	
+	pun.ptr = result;
+	uint_t rcx = pun.uint;
     pun.str = str;
-    uint_t rcx = pun.uint;
-    pun.i = n;
     uint_t rdx = pun.uint;
-    pun.fileptr = stream;
+    pun.i = n;
     uint_t rdi = pun.uint;
+    pun.fileptr = stream;
+    uint_t rsi = pun.uint;
+    kAFL_hypercall(FGETS, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(FGETS, rcx, rdx, rdi, 0, 0, 0);
-    return pun.str;
+    return result;
 }
 
 void SYM(rewind)(FILE *stream) {
+    rewind(stream);
+
     pun.fileptr = stream;
     uint_t rcx = pun.uint;
     
@@ -200,304 +232,236 @@ void SYM(rewind)(FILE *stream) {
 }
 
 int SYM(fseek)(FILE *stream, long offset, int whence) {
+    int result = fseek(stream, offset, whence);
+	
+	pun.i = result;
+	uint_t rcx = pun.uint;
     pun.fileptr = stream;
-    uint_t rcx = pun.uint;
-    pun.l = offset;
     uint_t rdx = pun.uint;
-    pun.i = whence;
+    pun.l = offset;
     uint_t rdi = pun.uint;
+    pun.i = whence;
+    uint_t rsi = pun.uint;
+    kAFL_hypercall(FSEEK, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(FSEEK, rcx, rdx, rdi, 0, 0, 0);
-    return pun.i;
+    return result;
 }
 
 int SYM(fseeko)(FILE *stream, off_t offset, int whence) {
+    int result = fseeko(stream, offset, whence);
+	
+	pun.i = result;
+	uint_t rcx = pun.uint;
     pun.fileptr = stream;
-    uint_t rcx = pun.uint;
-    pun.l = offset;
     uint_t rdx = pun.uint;
-    pun.i = whence;
+    pun.l = offset;
     uint_t rdi = pun.uint;
+    pun.i = whence;
+    uint_t rsi = pun.uint;
+    kAFL_hypercall(FSEEKO, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(FSEEKO, rcx, rdx, rdi, 0, 0, 0);
-    return pun.i;
+    return result;
 }
 
 int SYM(fseeko64)(FILE *stream, uint64_t offset, int whence) {
+    int result = fseeko64(stream, offset, whence);
+	
+	pun.i = result;
+	uint_t rcx = pun.uint;
     pun.fileptr = stream;
-    uint_t rcx = pun.uint;
-    pun.l = offset;
     uint_t rdx = pun.uint;
-    pun.i = whence;
+    pun.l = offset;
     uint_t rdi = pun.uint;
+    pun.i = whence;
+    uint_t rsi = pun.uint;
+    kAFL_hypercall(FSEEKO64, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(FSEEKO64, rcx, rdx, rdi, 0, 0, 0);
-    return pun.i;
+    return result;
 }
 
 int SYM(getc)(FILE *stream) {
+    int result = getc(stream);
+	
+	pun.i = result;
+	uint_t rcx = pun.uint;
     pun.fileptr = stream;
-    uint_t rcx = pun.uint;
+    uint_t rdx = pun.uint;
+    kAFL_hypercall(GETC, rcx, rdx, 0, 0, 0, 0);
 
-    pun.uint = kAFL_hypercall(GETC, rcx, 0, 0, 0, 0, 0);
-    return pun.i;
+    return result;
 }
 
 int SYM(fgetc)(FILE *stream) {
+    int result = fgetc(stream);
+	
+	pun.i = result;
+	uint_t rcx = pun.uint;
     pun.fileptr = stream;
-    uint_t rcx = pun.uint;
+    uint_t rdx = pun.uint;
+    kAFL_hypercall(FGETC, rcx, rdx, 0, 0, 0, 0);
 
-    pun.uint = kAFL_hypercall(FGETC, rcx, 0, 0, 0, 0, 0);
-    return pun.i;
+    return result;
 }
 
 int SYM(getchar)(void) { 
-    pun.uint = kAFL_hypercall(GETCHAR, 0, 0, 0, 0, 0, 0);
-    return pun.i;
+    return SYM(getc)(stdin);
 }
 
 int SYM(ungetc)(int c, FILE *stream) {
+    int result = ungetc(c, stream);
+	
+	pun.i = result;
+	uint_t rcx = pun.uint;
     pun.i = c;
-    uint_t rcx = pun.uint;
-    pun.fileptr = stream;
     uint_t rdx = pun.uint;
+    pun.fileptr = stream;
+    uint_t rdi = pun.uint;
+    kAFL_hypercall(UNGETC, rcx, rdx, rdi, 0, 0, 0);
 
-    pun.uint = kAFL_hypercall(UNGETC, rcx, rdx, 0, 0, 0, 0);
-    return pun.i;
+    return result;
 }
 
 void *SYM(memcpy)(void *dest, const void *src, size_t n) {
+    void *result = memcpy(dest, src, n);
+	
+	pun.ptr = result;
+	uint_t rcx = pun.uint;
     pun.ptr = dest;
-    uint_t rcx = pun.uint;
-    pun.cptr = src;
     uint_t rdx = pun.uint;
-    pun.size = n;
+    pun.cptr = src;
     uint_t rdi = pun.uint;
+    pun.size = n;
+    uint_t rsi = pun.uint;
+	kAFL_hypercall(MEMCPY, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(MEMCPY, rcx, rdx, rdi, 0, 0, 0);
-    return pun.ptr;
+    return result;
 }
 
 void *SYM(memset)(void *s, int c, size_t n) {
+    void *result = memset(s, c, n);
+	
+	pun.ptr = result;
+	uint_t rcx = pun.uint;
     pun.ptr = s;
-    uint_t rcx = pun.uint;
-    pun.i = c;
     uint_t rdx = pun.uint;
-    pun.size = n;
+    pun.i = c;
     uint_t rdi = pun.uint;
+    pun.size = n;
+    uint_t rsi = pun.uint;
+	kAFL_hypercall(MEMSET, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(MEMSET, rcx, rdx, rdi, 0, 0, 0);
-    return pun.ptr;
+    return result;
 }
 
 void SYM(bzero)(void *s, size_t n) {
+    bzero(s, n);
+
     pun.ptr = s;
     uint_t rcx = pun.uint;
     pun.size = n;
     uint_t rdx = pun.uint;
-
     kAFL_hypercall(BZERO, rcx, rdx, 0, 0, 0, 0);
 }
 
 void *SYM(memmove)(void *dest, const void *src, size_t n) {
+    void *result = memmove(dest, src, n);
+	
+	pun.ptr = result;
+	uint_t rcx = pun.uint;
     pun.ptr = dest;
-    uint_t rcx = pun.uint;
-    pun.cptr = src;
     uint_t rdx = pun.uint;
-    pun.size = n;
+    pun.cptr = src;
     uint_t rdi = pun.uint;
+    pun.size = n;
+    uint_t rsi = pun.uint;
+	kAFL_hypercall(MEMMOVE, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(MEMMOVE, rcx, rdx, rdi, 0, 0, 0);
-    return pun.ptr;
+	return result;
 }
 
 void SYM(bcopy)(const void *src, void *dest, size_t n) {
+    bcopy(src, dest, n);
+
     pun.cptr = src;
     uint_t rcx = pun.uint;
     pun.ptr = dest;
     uint_t rdx = pun.uint;
     pun.size = n;
     uint_t rdi = pun.uint;
-
     kAFL_hypercall(BCOPY, rcx, rdx, rdi, 0, 0, 0);
 }
 
 char *SYM(strncpy)(char *dest, const char *src, size_t n) {
+    char *result = strncpy(dest, src, n);
+	
+	pun.str = result;
+	uint_t rcx = pun.uint;
     pun.str = dest;
-    uint_t rcx = pun.uint;
-    pun.cstr = src;
     uint_t rdx = pun.uint;
-    pun.size = n;
+    pun.cstr = src;
     uint_t rdi = pun.uint;
+    pun.size = n;
+    uint_t rsi = pun.uint;
+	kAFL_hypercall(STRNCPY, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(STRNCPY, rcx, rdx, rdi, 0, 0, 0);
-    return pun.str;
+	return result;
 }
 
 const char *SYM(strchr)(const char *s, int c) {
+    const char *result = strchr(s, c);
+	
+	pun.cstr = result;
+	uint_t rcx = pun.uint;
     pun.cstr = s;
-    uint_t rcx = pun.uint;
-    pun.i = c;
     uint_t rdx = pun.uint;
+    pun.i = c;
+    uint_t rdi = pun.uint;
+	kAFL_hypercall(STRCHR, rcx, rdx, rdi, 0, 0, 0);
 
-    pun.uint = kAFL_hypercall(STRCHR, rcx, rdx, 0, 0, 0, 0);
-    return pun.cptr;
+	return result;
 }
 
 int SYM(memcmp)(const void *a, const void *b, size_t n) {
+    int result = memcmp(a, b, n);
+	
+	pun.i = result;
+	uint_t rcx = pun.uint;
     pun.cptr = a;
-    uint_t rcx = pun.uint;
-    pun.cptr = b;
     uint_t rdx = pun.uint;
-    pun.size = n;
+    pun.cptr = b;
     uint_t rdi = pun.uint;
+    pun.size = n;
+    uint_t rsi = pun.uint;
+	kAFL_hypercall(MEMCMP, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(MEMCMP, rcx, rdx, 0, 0, 0, 0);
-    return pun.i;
+	return result;
 }
 
 int SYM(bcmp)(const void *a, const void *b, size_t n) {
+    int result = bcmp(a, b, n);
+	
+	pun.i = result;
+	uint_t rcx = pun.uint;
     pun.cstr = a;
-    uint_t rcx = pun.uint;
-    pun.cstr = b;
     uint_t rdx = pun.uint;
-    pun.size = n;
+    pun.cstr = b;
     uint_t rdi = pun.uint;
+    pun.size = n;
+    uint_t rsi = pun.uint;
+	kAFL_hypercall(BCMP, rcx, rdx, rdi, rsi, 0, 0);
 
-    pun.uint = kAFL_hypercall(BCMP, rcx, rdx, 0, 0, 0, 0);
-    return pun.i;
+	return result;
 }
 
 uint32_t SYM(ntohl)(uint32_t netlong) {
+    uint32_t result = ntohl(netlong);
+	
+	pun.u32 = result;
+	uint_t rcx = pun.uint;
     pun.u32 = netlong;
-    uint_t rcx = pun.uint;
+    uint_t rdx = pun.uint;
+	kAFL_hypercall(NTOHL, rcx, rdx, 0, 0, 0, 0);
 
-    pun.uint = kAFL_hypercall(NTOHL, rcx, 0, 0, 0, 0, 0);
-    return pun.u32;
+	return result;
 }
 
-/* void *SYM(malloc)(size_t size) { */
-/*     return (void*) kAFL_hypercall(MALLOC, (uint_t) size, 0, 0, 0, 0, 0); */
-/* } */
-/**/
-/* void *SYM(calloc)(size_t nmemb, size_t size) { */
-/*     return (void*) kAFL_hypercall(CALLOC, (uint_t) nmemb, (uint_t) size, 0, 0, 0, 0); */
-/* } */
-/**/
-/* void *SYM(mmap64)(void *addr, size_t len, int prot, int flags, int fildes, */
-/*                   uint64_t off) { */
-/*     return (void*) kAFL_hypercall(MMAP64, (uint_t) addr, (uint_t) len, (uint_t) prot, (uint_t) flags, (uint_t) fildes, (uint_t) off); */
-/* } */
-/**/
-/* void *SYM(mmap)(void *addr, size_t len, int prot, int flags, int fildes, */
-/*                 uint32_t off) { */
-/*     return (void*) kAFL_hypercall(MMAP64, (uint_t) addr, (uint_t) len, (uint_t) prot, (uint_t) flags, (uint_t) fildes, (uint_t) off); */
-/* } */
-/**/
-/* int SYM(open)(const char *path, int oflag, mode_t mode) { */
-/*     return (int) kAFL_hypercall(OPEN, (uint_t) path, (uint_t) oflag, (uint_t) mode, 0, 0, 0); */
-/* } */
-/**/
-/* ssize_t SYM(read)(int fildes, void *buf, size_t nbyte) { */
-/*     return (ssize_t) kAFL_hypercall(READ, (uint_t) fildes, (uint_t) buf, (uint_t) nbyte, 0, 0, 0); */
-/* } */
-/**/
-/* uint64_t SYM(lseek64)(int fd, uint64_t offset, int whence) { */
-/*     return (uint64_t) kAFL_hypercall(LSEEK64, (uint_t) fd, (uint_t) offset, (uint_t) whence, 0, 0, 0); */
-/* } */
-/**/
-/* uint32_t SYM(lseek)(int fd, uint32_t offset, int whence) { */
-/*     return (uint32_t) kAFL_hypercall(LSEEK, (uint_t) fd, (uint_t) offset, (uint_t) whence, 0, 0, 0); */
-/* } */
-/**/
-/* FILE *SYM(fopen)(const char *pathname, const char *mode) { */
-/*     return (FILE *) kAFL_hypercall(FOPEN, (uint_t) pathname, (uint_t) mode, 0, 0, 0, 0); */
-/* } */
-/**/
-/* FILE *SYM(fopen64)(const char *pathname, const char *mode) { */
-/*     return (FILE *) kAFL_hypercall(FOPEN64, (uint_t) pathname, (uint_t) mode, 0, 0, 0, 0); */
-/* } */
-/**/
-/* size_t SYM(fread)(void *ptr, size_t size, size_t nmemb, FILE *stream) { */
-/*     return (size_t) kAFL_hypercall(FREAD, (uint_t) ptr, (uint_t) size, (uint_t) nmemb, (uint_t) stream, 0, 0); */
-/* } */
-/**/
-/* char *SYM(fgets)(char *str, int n, FILE *stream) { */
-/*     return (char *) kAFL_hypercall(FGETS, (uint_t) str, (uint_t) n, (uint_t) stream, 0, 0, 0); */
-/* } */
-/**/
-/* void SYM(rewind)(FILE *stream) { */
-/*     kAFL_hypercall(REWIND, (uint_t) stream, 0, 0, 0, 0, 0); */
-/* } */
-/**/
-/* int SYM(fseek)(FILE *stream, long offset, int whence) { */
-/*     return (int) kAFL_hypercall(FSEEK, (uint_t) stream, (uint_t) offset, (uint_t) whence, 0, 0, 0); */
-/* } */
-/**/
-/* int SYM(fseeko)(FILE *stream, off_t offset, int whence) { */
-/*     return (int) kAFL_hypercall(FSEEKO, (uint_t) stream, (uint_t) offset, (uint_t) whence, 0, 0, 0); */
-/* } */
-/**/
-/* int SYM(fseeko64)(FILE *stream, uint64_t offset, int whence) { */
-/*     return (int) kAFL_hypercall(FSEEKO64, (uint_t) stream, (uint_t) offset, (uint_t) whence, 0, 0, 0); */
-/* } */
-/**/
-/* int SYM(getc)(FILE *stream) { */
-/*     return (int) kAFL_hypercall(GETC, (uint_t) stream, 0, 0, 0, 0, 0); */
-/* } */
-/**/
-/* int SYM(fgetc)(FILE *stream) { */
-/*     return (int) kAFL_hypercall(FGETC, (uint_t) stream, 0, 0, 0, 0, 0); */
-/* } */
-/**/
-/* int SYM(getchar)(void) {  */
-/*     return (int) kAFL_hypercall(GETCHAR, 0, 0, 0, 0, 0, 0); */
-/* } */
-/**/
-/* int SYM(ungetc)(int c, FILE *stream) { */
-/*     return (int) kAFL_hypercall(UNGETC, (uint_t) c, (uint_t) stream, 0, 0, 0, 0); */
-/* } */
-/**/
-/* void *SYM(memcpy)(void *dest, const void *src, size_t n) { */
-/*     return (void *) kAFL_hypercall(MEMCPY, (uint_t) dest, (uint_t) src, (uint_t) n, 0, 0, 0); */
-/* } */
-/**/
-/* void *SYM(memset)(void *s, int c, size_t n) { */
-/*     return (void *) kAFL_hypercall(MEMSET, (uint_t) s, (uint_t) c, (uint_t) n, 0, 0, 0); */
-/* } */
-/**/
-/* void SYM(bzero)(void *s, size_t n) { */
-/*     kAFL_hypercall(BZERO, (uint_t) s, (uint_t) n, 0, 0, 0, 0); */
-/* } */
-/**/
-/* void *SYM(memmove)(void *dest, const void *src, size_t n) { */
-/*     return (void *) kAFL_hypercall(MEMMOVE, (uint_t) dest, (uint_t) src, (uint_t) n, 0, 0, 0); */
-/* } */
-/**/
-/* void SYM(bcopy)(const void *src, void *dest, size_t n) { */
-/*     kAFL_hypercall(BCOPY, (uint_t) src, (uint_t) dest, (uint_t) n, 0, 0, 0); */
-/* } */
-/**/
-/* char *SYM(strncpy)(char *dest, const char *src, size_t n) { */
-/*     return (char *) kAFL_hypercall(STRNCPY, (uint_t) dest, (uint_t) src, (uint_t) n, 0, 0, 0); */
-/* } */
-/**/
-/* const char *SYM(strchr)(const char *s, int c) { */
-/*     return (char *) kAFL_hypercall(STRCHR, (uint_t) s, (uint_t) c, 0, 0, 0, 0); */
-/* } */
-/**/
-/* int SYM(memcmp)(const void *a, const void *b, size_t n) { */
-/*     return (int) kAFL_hypercall(MEMCMP, (uint_t) a, (uint_t) b, (uint_t) n, 0, 0, 0); */
-/* } */
-/**/
-/* int SYM(bcmp)(const void *a, const void *b, size_t n) { */
-/*     return (int) kAFL_hypercall(BCMP, (uint_t) a, (uint_t) b, (uint_t) n, 0, 0, 0); */
-/* } */
-/**/
-/* uint32_t SYM(ntohl)(uint32_t netlong) { */
-/*     return (uint32_t) kAFL_hypercall(NTOHL, (uint_t) netlong, 0, 0, 0, 0, 0); */
-/* } */
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif

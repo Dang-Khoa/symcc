@@ -133,9 +133,9 @@ ssize_t SYM(read)(int fildes, void *buf, size_t nbyte) {
 }
 
 uint64_t SYM(lseek64)(int fd, uint64_t offset, int whence) {
-    off64_t result = lseek64(fd, offset, whence);
+    uint64_t result = lseek64(fd, offset, whence);
 	
-	pun.off64 = result;
+	pun.uint = result;
 	uint_t rcx = pun.uint;
     pun.i = fd;
     uint_t rdx = pun.uint;
@@ -332,7 +332,7 @@ void *SYM(memcpy)(void *dest, const void *src, size_t n) {
     uint_t rdi = pun.uint;
     pun.size = n;
     uint_t rsi = pun.uint;
-	kAFL_hypercall(MEMCPY, rcx, rdx, rdi, rsi, 0, 0);
+	kAFL_hypercall(MEMCPY_SYM, rcx, rdx, rdi, rsi, 0, 0);
 
     return result;
 }
@@ -348,7 +348,7 @@ void *SYM(memset)(void *s, int c, size_t n) {
     uint_t rdi = pun.uint;
     pun.size = n;
     uint_t rsi = pun.uint;
-	kAFL_hypercall(MEMSET, rcx, rdx, rdi, rsi, 0, 0);
+	kAFL_hypercall(MEMSET_SYM, rcx, rdx, rdi, rsi, 0, 0);
 
     return result;
 }
@@ -374,7 +374,7 @@ void *SYM(memmove)(void *dest, const void *src, size_t n) {
     uint_t rdi = pun.uint;
     pun.size = n;
     uint_t rsi = pun.uint;
-	kAFL_hypercall(MEMMOVE, rcx, rdx, rdi, rsi, 0, 0);
+	kAFL_hypercall(MEMMOVE_SYM, rcx, rdx, rdi, rsi, 0, 0);
 
 	return result;
 }
@@ -432,7 +432,7 @@ int SYM(memcmp)(const void *a, const void *b, size_t n) {
     uint_t rdi = pun.uint;
     pun.size = n;
     uint_t rsi = pun.uint;
-	kAFL_hypercall(MEMCMP, rcx, rdx, rdi, rsi, 0, 0);
+	kAFL_hypercall(MEMCMP_SYM, rcx, rdx, rdi, rsi, 0, 0);
 
 	return result;
 }

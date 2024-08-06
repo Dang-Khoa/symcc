@@ -31,7 +31,7 @@
 static pun_t pun;
 
 void _sym_initialize(void) {
-    kAFL_hypercall(INITIALIZE, 0, 0, 0, 0, 0, 0);
+    kAFL_hypercall(INITIALIZE, 0, 0, 0, 0, 0, 0, 0);
     return;
 }
 
@@ -41,7 +41,7 @@ SymExpr _sym_build_integer(uint64_t value, uint8_t bits) {
     pun.u8 = bits;
     uint_t rdx = pun.uint;
     
-    pun.uint = kAFL_hypercall(BUILD_INTEGER, rcx, rdx, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(BUILD_INTEGER, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -51,7 +51,7 @@ SymExpr _sym_build_integer128(uint64_t high, uint64_t low) {
     pun.u8 = low;
     uint_t rdx = pun.uint;
     
-    pun.uint = kAFL_hypercall(BUILD_INTEGER128, rcx, rdx, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(BUILD_INTEGER128, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -61,7 +61,7 @@ SymExpr _sym_build_integer_from_buffer(void *buffer, unsigned num_bits) {
     pun.u = num_bits;
     uint_t rdx = pun.uint;
     
-    pun.uint = kAFL_hypercall(BUILD_INTEGER_FROM_BUFFER, rcx, rdx, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(BUILD_INTEGER_FROM_BUFFER, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -71,7 +71,7 @@ SymExpr _sym_build_float(double value, int is_double) {
     pun.i = is_double;
     uint_t rdx = pun.uint;
     
-    pun.uint = kAFL_hypercall(BUILD_FLOAT, rcx, rdx, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(BUILD_FLOAT, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -81,20 +81,20 @@ SymExpr _sym_get_input_byte(size_t offset,  uint8_t concrete_value){
     pun.u8 = concrete_value;
     uint_t rdx = pun.uint;
     
-    pun.uint = kAFL_hypercall(GET_INPUT_BYTE, rcx, rdx, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(GET_INPUT_BYTE, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
 SymExpr _sym_build_null_pointer(void)  {
-    pun.uint = kAFL_hypercall(BUILD_NULL_POINTER, 0, 0, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(BUILD_NULL_POINTER, 0, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 SymExpr _sym_build_true(void)  {
-    pun.uint = kAFL_hypercall(BUILD_TRUE, 0, 0, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(BUILD_TRUE, 0, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 SymExpr _sym_build_false(void)  {
-    pun.uint = kAFL_hypercall(BUILD_FALSE, 0, 0, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(BUILD_FALSE, 0, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -103,7 +103,7 @@ SymExpr _sym_build_bool(bool value)  {
     pun.b = value;
     uint_t rcx = pun.uint;
 
-    pun.uint = kAFL_hypercall(BUILD_BOOL, rcx, 0, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(BUILD_BOOL, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -112,7 +112,7 @@ SymExpr _sym_build_neg(Z3_ast expr) {
     pun.z3 = expr;
     uint_t rcx = pun.uint;
 
-    pun.uint = kAFL_hypercall(BUILD_NEG, rcx, 0, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(BUILD_NEG, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -123,7 +123,7 @@ SymExpr _sym_build_neg(Z3_ast expr) {
         pun.z3 = b; \
         uint_t rdx = pun.uint; \
         \
-        pun.uint = kAFL_hypercall(z3_name, rcx, rdx, 0, 0, 0, 0); \
+        pun.uint = kAFL_hypercall(z3_name, rcx, rdx, 0, 0, 0, 0, 0); \
         return pun.sym; \
     }
 
@@ -169,7 +169,7 @@ SymExpr _sym_build_ite(Z3_ast cond, Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdi = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_ITE, rcx, rdx, rdi, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_ITE, rcx, rdx, rdi, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -179,7 +179,7 @@ SymExpr _sym_build_fp_add(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FP_ADD, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FP_ADD, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -189,7 +189,7 @@ SymExpr _sym_build_fp_sub(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FP_SUB, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FP_SUB, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -199,7 +199,7 @@ SymExpr _sym_build_fp_mul(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FP_MUL, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FP_MUL, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -209,7 +209,7 @@ SymExpr _sym_build_fp_div(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FP_DIV, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FP_DIV, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -219,7 +219,7 @@ SymExpr _sym_build_fp_rem(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FP_REM, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FP_REM, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -227,7 +227,7 @@ SymExpr _sym_build_fp_abs(Z3_ast a) {
     pun.z3 = a;
     uint_t rcx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FP_ABS, rcx, 0, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FP_ABS, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -235,7 +235,7 @@ SymExpr _sym_build_fp_neg(Z3_ast a) {
     pun.z3 = a;
     uint_t rcx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FP_NEG, rcx, 0, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FP_NEG, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -243,7 +243,7 @@ SymExpr _sym_build_not(Z3_ast expr) {
     pun.z3 = expr;
     uint_t rcx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_NOT, rcx, 0, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_NOT, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -253,7 +253,7 @@ SymExpr _sym_build_not_equal(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_NOT_EQUAL, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_NOT_EQUAL, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -263,7 +263,7 @@ SymExpr _sym_build_bool_and(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_BOOL_AND, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_BOOL_AND, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -273,7 +273,7 @@ SymExpr _sym_build_bool_or(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_BOOL_OR, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_BOOL_OR, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -283,7 +283,7 @@ SymExpr _sym_build_float_ordered_not_equal(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_ORDERED_NOT_EQUAL, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_ORDERED_NOT_EQUAL, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -293,7 +293,7 @@ SymExpr _sym_build_float_ordered(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_ORDERED, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_ORDERED, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -303,7 +303,7 @@ SymExpr _sym_build_float_unordered(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -313,7 +313,7 @@ SymExpr _sym_build_float_unordered_greater_than(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_GREATER_THAN, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_GREATER_THAN, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -323,7 +323,7 @@ SymExpr _sym_build_float_unordered_greater_equal(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_GREATER_EQUAL, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_GREATER_EQUAL, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -333,7 +333,7 @@ SymExpr _sym_build_float_unordered_less_than(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_LESS_THAN, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_LESS_THAN, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -343,7 +343,7 @@ SymExpr _sym_build_float_unordered_less_equal(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_LESS_EQUAL, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_LESS_EQUAL, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -353,7 +353,7 @@ SymExpr _sym_build_float_unordered_equal(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_EQUAL, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_EQUAL, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -363,7 +363,7 @@ SymExpr _sym_build_float_unordered_not_equal(Z3_ast a, Z3_ast b) {
     pun.z3 = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_NOT_EQUAL, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_UNORDERED_NOT_EQUAL, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -373,7 +373,7 @@ SymExpr _sym_build_sext(Z3_ast expr, uint8_t bits) {
     pun.u8 = bits;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_SEXT, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_SEXT, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -383,7 +383,7 @@ SymExpr _sym_build_zext(Z3_ast expr, uint8_t bits) {
     pun.u8 = bits;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_ZEXT, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_ZEXT, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -393,7 +393,7 @@ SymExpr _sym_build_trunc(Z3_ast expr, uint8_t bits) {
     pun.u8 = bits;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_TRUNC, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_TRUNC, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -405,7 +405,7 @@ SymExpr _sym_build_int_to_float(Z3_ast value, int is_double, int is_signed) {
     pun.i = is_signed;
     uint_t rdi = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_INT_TO_FLOAT, rcx, rdx, rdi, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_INT_TO_FLOAT, rcx, rdx, rdi, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -415,7 +415,7 @@ SymExpr _sym_build_float_to_float(Z3_ast expr, int to_double) {
     pun.i = to_double;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_TO_FLOAT, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_TO_FLOAT, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -425,7 +425,7 @@ SymExpr _sym_build_bits_to_float(Z3_ast expr, int to_double) {
     pun.i = to_double;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_BITS_TO_FLOAT, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_BITS_TO_FLOAT, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -433,12 +433,12 @@ SymExpr _sym_build_float_to_bits(Z3_ast expr) {
     pun.z3 = expr;
     uint_t rcx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_TO_BITS, rcx, 0, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_TO_BITS, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
 SymExpr _sym_build_float_to_signed_integer(Z3_ast expr, uint8_t bits) {
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_TO_SIGNED_INTEGER, (uint_t)expr, (uint_t) bits, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_TO_SIGNED_INTEGER, (uint_t)expr, (uint_t) bits, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -448,7 +448,7 @@ SymExpr _sym_build_float_to_unsigned_integer(Z3_ast expr, uint8_t bits) {
     pun.u8 = bits;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_FLOAT_TO_UNSIGNED_INTEGER, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_FLOAT_TO_UNSIGNED_INTEGER, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -456,7 +456,7 @@ SymExpr _sym_build_bool_to_bit(Z3_ast expr) {
     pun.z3 = expr;
     uint_t rcx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BUILD_BOOL_TO_BIT, rcx, 0, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BUILD_BOOL_TO_BIT, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -468,7 +468,7 @@ void _sym_push_path_constraint(SymExpr constraint, int taken, uintptr_t size_id 
     pun.uintptr = size_id;
     uint_t rdi = pun.uint;
 
-	pun.uint = kAFL_hypercall(PUSH_PATH_CONSTRAINT, rcx, rdx, rdi, 0, 0, 0);
+	pun.uint = kAFL_hypercall(PUSH_PATH_CONSTRAINT, rcx, rdx, rdi, 0, 0, 0, 0);
 }
 
 SymExpr _sym_concat_helper(SymExpr a, SymExpr b) {
@@ -477,7 +477,7 @@ SymExpr _sym_concat_helper(SymExpr a, SymExpr b) {
     pun.sym = b;
     uint_t rdx = pun.uint;
 
-	pun.uint = kAFL_hypercall(CONCAT_HELPER, rcx, rdx, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(CONCAT_HELPER, rcx, rdx, 0, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -489,7 +489,7 @@ SymExpr _sym_extract_helper(SymExpr expr, size_t first_bit, size_t last_bit) {
     pun.size = last_bit;
     uint_t rdi = pun.uint;
 
-	pun.uint = kAFL_hypercall(EXTRACT_HELPER, rcx, rdx, rdi, 0, 0, 0);
+	pun.uint = kAFL_hypercall(EXTRACT_HELPER, rcx, rdx, rdi, 0, 0, 0, 0);
 	return pun.sym;
 }
 
@@ -497,7 +497,7 @@ size_t _sym_bits_helper(SymExpr expr) {
     pun.sym = expr;
     uint_t rcx = pun.uint;
 
-	pun.uint = kAFL_hypercall(BITS_HELPER, rcx, 0, 0, 0, 0, 0);
+	pun.uint = kAFL_hypercall(BITS_HELPER, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.size;
 }
 
@@ -511,7 +511,7 @@ const char *_sym_expr_to_string(SymExpr expr) {
     pun.sym = expr;
     uint_t rcx = pun.uint;
 
-    pun.uint = kAFL_hypercall(EXPR_TO_STRING, rcx, 0, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(EXPR_TO_STRING, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.cstr;
 }
 
@@ -519,12 +519,12 @@ bool _sym_feasible(SymExpr expr) {
     pun.sym = expr;
     uint_t rcx = pun.uint;
 
-    pun.uint = kAFL_hypercall(FEASIBLE, rcx, 0, 0, 0, 0, 0);
+    pun.uint = kAFL_hypercall(FEASIBLE, rcx, 0, 0, 0, 0, 0, 0);
 	return pun.b;
 }
 
 void _sym_collect_garbage() {
-    kAFL_hypercall(COLLECT_GARBAGE, 0, 0, 0, 0, 0, 0);
+    kAFL_hypercall(COLLECT_GARBAGE, 0, 0, 0, 0, 0, 0, 0);
 }
 
 void symcc_set_test_case_handler(TestCaseHandler) {

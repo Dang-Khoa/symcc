@@ -3,14 +3,20 @@
 
 #include <z3.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 
 #if defined(__ILP32__) || defined(_ILP32)
 typedef uint32_t uint_t;
+#define is_64bit 0
 #else
 typedef uint64_t uint_t;
+#define is_64bit 1
 #endif
 
+extern volatile int SYMCC_RUNTIME_ON;
 typedef Z3_ast SymExpr;
 
 typedef union {
@@ -18,7 +24,6 @@ typedef union {
     uint64_t u64;
     uint32_t u32;
     uint8_t u8;
-    off64_t off64;
     unsigned u;
     int i;
     double d;
@@ -40,7 +45,7 @@ typedef union {
     SymExpr *symptr;
 } pun_t;
 
-uint_t kAFL_hypercall(uint_t rbx, uint_t rcx, uint_t rdx, uint_t rdi, uint_t rsi, uint_t r8, uint_t r9);
+uint_t kAFL_hypercall(uint_t type, uint_t var1, uint_t var2, uint_t var3, uint_t var4, uint_t var5, uint_t var6, uint_t var7);
 
 enum Sym {
     INITIALIZE = 1,
@@ -180,7 +185,12 @@ enum Sym {
     BCOPY = 135,
     BCMP = 136,
     BZERO = 137,
+    MEMCPY_SYM = 138,
+    MEMSET_SYM = 139,
+    MEMMOVE_SYM = 140,
+    MEMCMP_SYM = 141
 };
 
+const char *getEnumName(enum Sym value);
 
 #endif // HYPERCALL_H

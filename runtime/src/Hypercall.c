@@ -1,5 +1,7 @@
 #include "Hypercall.h"
 
+static volatile int SYMCC_ON __attribute__((section(".data"))) = 1;
+
 #define HYPERCALL_KAFL_RAX_ID                0x01f
 #define KAFL_HYPERCALL_PT_64(_rbx, _rcx, _rdx, _rdi, _rsi, _r8, _r9, _r10) ({ \
     uint_t _rax = HYPERCALL_KAFL_RAX_ID; \
@@ -28,9 +30,10 @@
 })
 
 uint_t kAFL_hypercall(uint_t type, uint_t var1, uint_t var2, uint_t var3, uint_t var4, uint_t var5, uint_t var6, uint_t var7) {
-    if(is_64bit)
-        return KAFL_HYPERCALL_PT_64(type, var1, var2, var3, var4, var5, var6, var7);
-    else
-        return KAFL_HYPERCALL_PT_32(type, var1, var2, var3, var4, var5, var6, var7); 
+    if(SYMCC_ON == 1) {
+        if(is_64bit) 
+            return KAFL_HYPERCALL_PT_64(type, var1, var2, var3, var4, var5, var6, var7);
+        return KAFL_HYPERCALL_PT_32(type, var1, var2, var3, var4, var5, var6, var7);
+    }
     return 0;
 }

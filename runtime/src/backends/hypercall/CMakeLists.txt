@@ -51,4 +51,4 @@ target_include_directories(SymCCRtObj PRIVATE
   ${SYMCC_RT_INCLUDE_DIR}
   ${Z3_C_INCLUDE_DIRS})
 
-set_target_properties(SymCCRtObj PROPERTIES COMPILE_FLAGS "-Werror -Wno-error=deprecated-declarations")
+set_target_properties(SymCCRtObj PROPERTIES COMPILE_FLAGS "-g -Werror -Wno-error=deprecated-declarations -fPIE -fPIC")

@@ -16,7 +16,6 @@ typedef uint64_t uint_t;
 #define is_64bit 1
 #endif
 
-extern volatile int SYMCC_RUNTIME_ON;
 typedef Z3_ast SymExpr;
 
 typedef union {

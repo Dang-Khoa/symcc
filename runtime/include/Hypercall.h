@@ -44,7 +44,7 @@ typedef union {
     SymExpr *symptr;
 } pun_t;
 
-uint_t kAFL_hypercall(uint_t type, uint_t var1, uint_t var2, uint_t var3, uint_t var4, uint_t var5, uint_t var6, uint_t var7);
+uint_t hypercall(uint_t type, uint_t var1, uint_t var2, uint_t var3, uint_t var4);
 
 enum Sym {
     INITIALIZE = 1,
